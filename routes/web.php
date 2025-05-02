@@ -24,7 +24,6 @@ Route::middleware('auth')->group(function () {
     Route::delete('job-applications/{application}', [JobApplicationController::class, 'destroy'])->name('job-applications.destroy');
     Route::put('job-listings/{jobListing}/approve', [AdminController::class, 'approve'])->name('job-listings.approve');
     Route::put('job-listings/{jobListing}/reject', [AdminController::class, 'reject'])->name('job-listings.reject');
-
 });
 
 require __DIR__.'/auth.php';
