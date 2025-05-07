@@ -3,62 +3,45 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-
+use App\Models\Job;
+use App\Models\Application;
+use Illuminate\Support\Facades\Auth;
 class JobApplicationController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    // Candidate: Apply to a job
+    public function apply(Request $request, $jobId)
     {
-        return "Iam in the index method of JobApplicationController";
+        $job = Job::findOrFail($jobId);
+
+        $request->validate([
+            'resume' => 'nullable|file|mimes:pdf,doc,docx|max:2048',
+        ]);
+
+        $resumePath = $request->file('resume') 
+            ? $request->file('resume')->store('resumes', 'public') 
+            : Auth::user()->resume_path;
+
+        Application::create([
+            'job_id' => $job->id,
+            'candidate_id' => Auth::id(),
+            'resume_path' => $resumePath,
+        ]);
+
+        return back()->with('success', 'Application submitted.');
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    // Employer: View applications for a job
+    public function viewApplications($jobId)
     {
-        return "iam in the create method of JobApplicationController";
+        $job = Job::with('applications.candidate')->findOrFail($jobId);
+        return view('employer.jobs.applications', compact('job'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    // Candidate: Cancel application
+    public function cancel($applicationId)
     {
-        return "iam in the store method of JobApplicationController";
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        return "iam in the show method of JobApplicationController";
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        return "iam in the edit method of JobApplicationController";
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        return "iam in the update method of JobApplicationController";
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        return "iam in the destroy method of JobApplicationController";
+        $application = Application::where('id', $applicationId)->where('candidate_id', Auth::id())->firstOrFail();
+        $application->delete();
+        return back()->with('success', 'Application canceled.');
     }
 }

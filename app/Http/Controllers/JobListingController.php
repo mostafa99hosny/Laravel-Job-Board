@@ -3,64 +3,75 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Job;
+use Illuminate\Support\Facades\Auth;
 
 class JobListingController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     * http://127.0.0.1:8000/job-listings/
-     */ 
+    // Show all jobs (public)
     public function index()
     {
-        return "Iam in the index method of JobListingController";
+        $jobs = Job::where('status', 'approved')->latest()->paginate(10);
+        return view('jobs.index', compact('jobs'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     * http://127.0.0.1:8000/job-listings/create
-     */
+    // Show single job
+    public function show($id)
+    {
+        $job = Job::findOrFail($id);
+        return view('jobs.show', compact('job'));
+    }
+
+    // Employer: Create job form
     public function create()
     {
-        return "iam in the create method of JobListingController";
+        return view('employer.jobs.create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
+    // Employer: Store new job
     public function store(Request $request)
     {
-        return "iam in the store method of JobListingController";
+        $request->validate([
+            'title' => 'required',
+            'description' => 'required',
+            'location' => 'required',
+            'category' => 'required',
+            'salary' => 'nullable|numeric',
+        ]);
+
+        Job::create([
+            'title' => $request->title,
+            'description' => $request->description,
+            'location' => $request->location,
+            'category' => $request->category,
+            'salary' => $request->salary,
+            'status' => 'pending',
+            'employer_id' => Auth::id(),
+        ]);
+
+        return redirect()->route('employer.dashboard')->with('success', 'Job posted. Waiting for admin approval.');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    // Employer: Edit job
+    public function edit($id)
     {
-        return "iam in the show method of JobListingController";
+        $job = Job::findOrFail($id);
+        return view('employer.jobs.edit', compact('job'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
+    // Employer: Update job
+    public function update(Request $request, $id)
     {
-        return  "iam in the edit method of JobListingController";
+        $job = Job::findOrFail($id);
+        $job->update($request->only(['title', 'description', 'location', 'category', 'salary']));
+        return redirect()->route('employer.dashboard')->with('success', 'Job updated.');
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    // Employer: Delete job
+    public function destroy($id)
     {
-        return "iam in the update method of JobListingController";
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        return "iam in the destroy method of JobListingController";
+        $job = Job::findOrFail($id);
+        $job->delete();
+        return redirect()->route('employer.dashboard')->with('success', 'Job deleted.');
     }
 }

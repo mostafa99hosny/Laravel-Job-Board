@@ -3,27 +3,48 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Job;
+use App\Models\User;
 
 class AdminController extends Controller
 {
-    /**
-     * Approve a job listing.
-     */
-    public function approve(Request $request, $jobListingId)
+    // Admin Dashboard
+    public function dashboard()
     {
-        // Logic to approve the job listing
-        return response()->json(['message' => 'Job listing approved successfully.']);
+        $jobs = Job::latest()->take(10)->get();
+        $users = User::latest()->take(10)->get();
+        return view('admin.dashboard', compact('jobs', 'users'));
     }
 
-    /**
-     * Reject a job listing.
-     */
-    public function reject(Request $request, $jobListingId)
+    // Manage Users
+    public function manageUsers()
     {
-        // Logic to reject the job listing
-        return response()->json(['message' => 'Job listing rejected successfully.']);
+        $users = User::all();
+        return view('admin.users', compact('users'));
     }
-    /**
-     * Display a listing of the job applications.
-     */
+
+    // Approve/Reject Jobs
+    public function pendingJobs()
+    {
+        $jobs = Job::where('status', 'pending')->get();
+        return view('admin.jobs.pending', compact('jobs'));
+    }
+
+    public function approveJob($id)
+    {
+        $job = Job::findOrFail($id);
+        $job->status = 'approved';
+        $job->save();
+
+        return redirect()->back()->with('success', 'Job approved.');
+    }
+
+    public function rejectJob($id)
+    {
+        $job = Job::findOrFail($id);
+        $job->status = 'rejected';
+        $job->save();
+
+        return redirect()->back()->with('error', 'Job rejected.');
+    }
 }
