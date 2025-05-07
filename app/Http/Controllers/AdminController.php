@@ -1,29 +1,31 @@
-<?php
-
+<?php 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Job;
 use App\Models\User;
+use Illuminate\Http\Request;
+use App\Http\Middleware\RoleMiddleware;
+use App\Http\Kernel;
 
 class AdminController extends Controller
 {
-    // Admin Dashboard
-    public function dashboard()
+    public function __construct()
     {
-        $jobs = Job::latest()->take(10)->get();
-        $users = User::latest()->take(10)->get();
-        return view('admin.dashboard', compact('jobs', 'users'));
+        // Ensure only admins can access
+        $this->middleware('role:admin');
     }
 
-    // Manage Users
+    public function dashboard()
+    {
+        return view('admin.dashboard');
+    }
+
     public function manageUsers()
     {
         $users = User::all();
-        return view('admin.users', compact('users'));
+        return view('admin.users.manage', compact('users'));
     }
 
-    // Approve/Reject Jobs
     public function pendingJobs()
     {
         $jobs = Job::where('status', 'pending')->get();
@@ -36,7 +38,7 @@ class AdminController extends Controller
         $job->status = 'approved';
         $job->save();
 
-        return redirect()->back()->with('success', 'Job approved.');
+        return redirect()->route('admin.jobs.pending')->with('success', 'Job approved.');
     }
 
     public function rejectJob($id)
@@ -45,6 +47,7 @@ class AdminController extends Controller
         $job->status = 'rejected';
         $job->save();
 
-        return redirect()->back()->with('error', 'Job rejected.');
+        return redirect()->route('admin.jobs.pending')->with('error', 'Job rejected.');
     }
 }
+?>

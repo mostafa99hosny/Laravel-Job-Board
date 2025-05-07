@@ -1,15 +1,15 @@
-<?php
-
+<?php 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Job;
 use App\Models\Application;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+
 class JobApplicationController extends Controller
 {
     // Candidate: Apply to a job
-    public function apply(Request $request, $jobId)
+    public function store(Request $request, $jobId)
     {
         $job = Job::findOrFail($jobId);
 
@@ -38,10 +38,11 @@ class JobApplicationController extends Controller
     }
 
     // Candidate: Cancel application
-    public function cancel($applicationId)
+    public function destroy($applicationId)
     {
         $application = Application::where('id', $applicationId)->where('candidate_id', Auth::id())->firstOrFail();
         $application->delete();
         return back()->with('success', 'Application canceled.');
     }
 }
+?>

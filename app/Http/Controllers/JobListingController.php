@@ -1,34 +1,29 @@
 <?php
-
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Job;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class JobListingController extends Controller
 {
-    // Show all jobs (public)
+    public function __construct()
+    {
+        // Ensure only employers can create/edit/delete jobs
+        $this->middleware('role:employer');
+    }
+
     public function index()
     {
         $jobs = Job::where('status', 'approved')->latest()->paginate(10);
-        return view('jobs.index', compact('jobs'));
+        return view('job-listings.index', compact('jobs'));
     }
 
-    // Show single job
-    public function show($id)
-    {
-        $job = Job::findOrFail($id);
-        return view('jobs.show', compact('job'));
-    }
-
-    // Employer: Create job form
     public function create()
     {
-        return view('employer.jobs.create');
+        return view('job-listings.create');
     }
 
-    // Employer: Store new job
     public function store(Request $request)
     {
         $request->validate([
@@ -49,29 +44,27 @@ class JobListingController extends Controller
             'employer_id' => Auth::id(),
         ]);
 
-        return redirect()->route('employer.dashboard')->with('success', 'Job posted. Waiting for admin approval.');
+        return redirect()->route('job-listings.index')->with('success', 'Job posted. Waiting for admin approval.');
     }
 
-    // Employer: Edit job
     public function edit($id)
     {
         $job = Job::findOrFail($id);
-        return view('employer.jobs.edit', compact('job'));
+        return view('job-listings.edit', compact('job'));
     }
 
-    // Employer: Update job
     public function update(Request $request, $id)
     {
         $job = Job::findOrFail($id);
         $job->update($request->only(['title', 'description', 'location', 'category', 'salary']));
-        return redirect()->route('employer.dashboard')->with('success', 'Job updated.');
+        return redirect()->route('job-listings.index')->with('success', 'Job updated.');
     }
 
-    // Employer: Delete job
     public function destroy($id)
     {
         $job = Job::findOrFail($id);
         $job->delete();
-        return redirect()->route('employer.dashboard')->with('success', 'Job deleted.');
+        return redirect()->route('job-listings.index')->with('success', 'Job deleted.');
     }
 }
+?>
