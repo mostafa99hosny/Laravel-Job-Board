@@ -8,7 +8,8 @@ class JobListingController extends Controller
 {
     /**
      * Display a listing of the resource.
-     */
+     * http://127.0.0.1:8000/job-listings/
+     */ 
     public function index()
     {
         return "Iam in the index method of JobListingController";
@@ -16,6 +17,7 @@ class JobListingController extends Controller
 
     /**
      * Show the form for creating a new resource.
+     * http://127.0.0.1:8000/job-listings/create
      */
     public function create()
     {
