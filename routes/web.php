@@ -6,6 +6,10 @@ use App\Http\Controllers\JobApplicationController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\EmployerController;
 use App\Http\Controllers\CandidateController;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\AboutController;
+use App\Http\Controllers\ContactController;
+use App\Http\Controllers\EmployersViewController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -20,9 +24,30 @@ use Illuminate\Support\Facades\Route;
 */
 
 // Public Routes
-Route::get('/', function () {
-    return redirect()->route('job-listings.index');
-})->name('home');
+Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/welcome', function() {
+    return view('welcome');
+})->name('welcome');
+
+// Test routes - remove these after testing
+Route::get('/test', function() {
+    return "This is a test route. If you can see this, routing is working.";
+})->name('test');
+
+Route::get('/test-about', function() {
+    return view('about');
+})->name('test-about');
+
+Route::get('/test-controller', [App\Http\Controllers\TestController::class, 'index'])->name('test-controller');
+
+// About and Contact routes
+Route::get('/about', [AboutController::class, 'index'])->name('about');
+Route::get('/contact', [ContactController::class, 'index'])->name('contact');
+Route::post('/contact', [ContactController::class, 'submit'])->name('contact.submit');
+
+// Employers routes
+Route::get('/employers', [EmployersViewController::class, 'index'])->name('employers.index');
+Route::get('/employers/{id}', [EmployersViewController::class, 'show'])->name('employers.show');
 
 // Job Listings (Public)
 Route::get('/job-listings', [JobListingController::class, 'index'])
