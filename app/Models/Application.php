@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class Application extends Model
 {
     protected $fillable = [
-        'job_id', 'candidate_id', 'resume_path'
+        'job_id', 'candidate_id', 'resume_path', 'message', 'status'
     ];
 
     public function candidate(): BelongsTo

@@ -1,4 +1,4 @@
-<?php 
+<?php
 namespace App\Http;
 
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
@@ -12,7 +12,7 @@ class Kernel extends HttpKernel
      *
      * @var array
      */
-    protected $routeMiddleware = [
+    protected $middlewareAliases = [
         'role' => \App\Http\Middleware\RoleMiddleware::class,
     ];
 }

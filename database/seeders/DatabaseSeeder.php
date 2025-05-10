@@ -2,9 +2,8 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Schema;
 
 class DatabaseSeeder extends Seeder
 {
@@ -13,11 +12,27 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        // Disable foreign key checks to avoid constraint issues
+        Schema::disableForeignKeyConstraints();
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        // Clear existing data
+        $this->command->info('Clearing existing data...');
+        \App\Models\Application::truncate();
+        \App\Models\Job::truncate();
+        \App\Models\User::truncate();
+
+        // Re-enable foreign key checks
+        Schema::enableForeignKeyConstraints();
+
+        $this->command->info('Seeding users...');
+        $this->call(UserSeeder::class);
+
+        $this->command->info('Seeding jobs...');
+        $this->call(JobSeeder::class);
+
+        $this->command->info('Seeding applications...');
+        $this->call(ApplicationSeeder::class);
+
+        $this->command->info('Database seeding completed successfully!');
     }
 }

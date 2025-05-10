@@ -2,48 +2,97 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Models\Job;
 use App\Models\Application;
-// use Auth;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class CandidateController extends Controller
 {
-    // Candidate Dashboard
+    /**
+     * Display the candidate dashboard with their applications
+     *
+     * @return \Illuminate\View\View
+     */
     public function dashboard()
     {
-        $applications = Application::where('candidate_id', Auth::id())->with('job')->get();
-        return view('candidate.dashboard', compact('applications'));
+        // Get the candidate's job applications with job details
+        $applications = Application::where('candidate_id', Auth::id())
+            ->with(['job' => function($query) {
+                $query->with('employer');
+            }])
+            ->latest()
+            ->get();
+
+        // Get some recommended jobs based on the candidate's applications
+        $recommendedJobs = Job::where('is_approved', true)
+            ->whereNotIn('id', $applications->pluck('job_id')->toArray())
+            ->latest()
+            ->take(3)
+            ->get();
+
+        return view('candidate.dashboard', compact('applications', 'recommendedJobs'));
     }
 
-    // Show Candidate Profile
+    /**
+     * Show the candidate's profile
+     *
+     * @return \Illuminate\View\View
+     */
     public function profile()
     {
         $candidate = Auth::user();
         return view('candidate.profile', compact('candidate'));
     }
 
-    // Update Candidate Profile
+    /**
+     * Update the candidate's profile information
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function updateProfile(Request $request)
     {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users,email,' . Auth::id(),
+            'skills' => 'nullable|string',
+            'experience' => 'nullable|string',
+            'bio' => 'nullable|string|max:1000',
+        ]);
+
         $candidate = Auth::user();
         $candidate->update($request->only(['name', 'email', 'skills', 'experience', 'bio']));
-        return redirect()->back()->with('success', 'Profile updated.');
+
+        return redirect()->route('candidate.profile')
+            ->with('success', 'Your profile has been updated successfully.');
     }
 
-    // Upload Resume
+    /**
+     * Upload a resume for the candidate
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function uploadResume(Request $request)
     {
         $request->validate([
             'resume' => 'required|file|mimes:pdf,doc,docx|max:2048'
         ]);
 
-        $path = $request->file('resume')->store('resumes', 'public');
-
+        // Delete old resume if exists
         $candidate = Auth::user();
+        if ($candidate->resume_path) {
+            Storage::disk('public')->delete($candidate->resume_path);
+        }
+
+        // Store new resume
+        $path = $request->file('resume')->store('resumes', 'public');
         $candidate->resume_path = $path;
         $candidate->save();
 
-        return redirect()->back()->with('success', 'Resume uploaded.');
+        return redirect()->route('candidate.profile')
+            ->with('success', 'Your resume has been uploaded successfully.');
     }
 }

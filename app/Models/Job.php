@@ -8,8 +8,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Job extends Model
 {
+    protected $table = 'job_posts';
+
     protected $fillable = [
-        'title', 'description', 'location', 'category', 'salary', 'status', 'employer_id'
+        'title', 'description', 'location', 'type', 'salary_min', 'salary_max',
+        'deadline', 'category', 'employer_id', 'is_approved', 'company_logo'
     ];
 
     public function employer(): BelongsTo
@@ -20,5 +23,17 @@ class Job extends Model
     public function applications(): HasMany
     {
         return $this->hasMany(Application::class);
+    }
+
+    // Helper method to maintain compatibility with existing code
+    public function getStatusAttribute()
+    {
+        return $this->is_approved ? 'approved' : 'pending';
+    }
+
+    // Helper method to maintain compatibility with existing code
+    public function setStatusAttribute($value)
+    {
+        $this->attributes['is_approved'] = ($value === 'approved');
     }
 }
