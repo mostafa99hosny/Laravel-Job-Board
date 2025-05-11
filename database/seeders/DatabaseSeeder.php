@@ -25,13 +25,13 @@ class DatabaseSeeder extends Seeder
         Schema::enableForeignKeyConstraints();
 
         $this->command->info('Seeding users...');
-        $this->call(UserSeeder::class);
+        $this->call(UsersTableSeeder::class);
 
         $this->command->info('Seeding jobs...');
-        $this->call(JobSeeder::class);
+        $this->call(JobsTableSeeder::class);
 
         $this->command->info('Seeding applications...');
-        $this->call(ApplicationSeeder::class);
+        $this->call(ApplicationsTableSeeder::class);
 
         $this->command->info('Database seeding completed successfully!');
     }

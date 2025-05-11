@@ -3,11 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Job;
-use App\Models\User;
 use App\Models\Application;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
 
 class JobApplicationController extends Controller
 {
@@ -29,7 +27,7 @@ class JobApplicationController extends Controller
             ->latest()
             ->get();
 
-        return view('employer.job-applications', compact('job', 'applications'));
+        return view('employer.job.applications', compact('job', 'applications'));
     }
 
     /**
@@ -53,7 +51,6 @@ class JobApplicationController extends Controller
             return back()->with('error', 'Unauthorized action.');
         }
 
-        $oldStatus = $application->status;
         $application->status = $request->status;
         $application->save();
 
@@ -86,42 +83,62 @@ class JobApplicationController extends Controller
      */
     public function apply($jobId, Request $request = null)
     {
-        $job = Job::findOrFail($jobId);
+        try {
+            // Validate job ID
+            if (!is_numeric($jobId) || $jobId <= 0) {
+                return back()->with('error', 'Invalid job ID.');
+            }
 
-        // Check if job is approved
-        if (!$job->is_approved) {
-            return back()->with('error', 'This job is not available for applications.');
+            // Find the job or return with error
+            $job = Job::find($jobId);
+
+            if (!$job) {
+                return back()->with('error', 'The job you are trying to apply for does not exist or has been removed.');
+            }
+
+            // Check if job is approved
+            if (!$job->is_approved) {
+                return back()->with('error', 'This job is not available for applications.');
+            }
+
+            // Check if already applied
+            $existingApplication = Application::where('job_id', $job->id)
+                ->where('candidate_id', Auth::id())
+                ->first();
+
+            if ($existingApplication) {
+                return back()->with('error', 'You have already applied for this job.');
+            }
+
+            // Check if candidate has a resume
+            $candidate = Auth::user();
+            if (!$candidate->resume_path) {
+                return redirect()->route('candidate.profile')
+                    ->with('error', 'Please upload your resume before applying for jobs.');
+            }
+
+            // Get cover letter if provided
+            $message = $request?->input('message');
+
+            // Create application with try-catch to handle database errors
+            try {
+                Application::create([
+                    'job_id' => $job->id,
+                    'candidate_id' => Auth::id(),
+                    'resume_path' => $candidate->resume_path,
+                    'message' => $message,
+                    'status' => 'pending'
+                ]);
+
+                return back()->with('success', 'Your application has been submitted successfully.');
+            } catch (\Exception $e) {
+                \Log::error('Error creating job application: ' . $e->getMessage());
+                return back()->with('error', 'There was an error submitting your application. Please try again later.');
+            }
+        } catch (\Exception $e) {
+            \Log::error('Error in job application process: ' . $e->getMessage());
+            return back()->with('error', 'An unexpected error occurred. Please try again later.');
         }
-
-        // Check if already applied
-        $existingApplication = Application::where('job_id', $job->id)
-            ->where('candidate_id', Auth::id())
-            ->first();
-
-        if ($existingApplication) {
-            return back()->with('error', 'You have already applied for this job.');
-        }
-
-        // Check if candidate has a resume
-        $candidate = Auth::user();
-        if (!$candidate->resume_path) {
-            return redirect()->route('candidate.profile')
-                ->with('error', 'Please upload your resume before applying for jobs.');
-        }
-
-        // Get cover letter if provided
-        $message = $request ? $request->input('message') : null;
-
-        // Create application
-        $application = Application::create([
-            'job_id' => $job->id,
-            'candidate_id' => Auth::id(),
-            'resume_path' => $candidate->resume_path,
-            'message' => $message,
-            'status' => 'pending'
-        ]);
-
-        return back()->with('success', 'Your application has been submitted successfully.');
     }
 
     /**
@@ -133,49 +150,79 @@ class JobApplicationController extends Controller
      */
     public function store(Request $request, $jobId)
     {
-        $job = Job::findOrFail($jobId);
+        try {
+            // Validate job ID
+            if (!is_numeric($jobId) || $jobId <= 0) {
+                return back()->with('error', 'Invalid job ID.');
+            }
 
-        $request->validate([
-            'resume' => 'nullable|file|mimes:pdf,doc,docx|max:2048',
-            'message' => 'nullable|string|max:1000',
-        ]);
+            // Find the job or return with error
+            $job = Job::find($jobId);
 
-        // Check if already applied
-        $existingApplication = Application::where('job_id', $job->id)
-            ->where('candidate_id', Auth::id())
-            ->first();
+            if (!$job) {
+                return back()->with('error', 'The job you are trying to apply for does not exist or has been removed.');
+            }
 
-        if ($existingApplication) {
-            return back()->with('error', 'You have already applied for this job.');
+            // Check if job is approved
+            if (!$job->is_approved) {
+                return back()->with('error', 'This job is not available for applications.');
+            }
+
+            $request->validate([
+                'resume' => 'nullable|file|mimes:pdf,doc,docx|max:5120',
+                'message' => 'nullable|string|max:1000',
+            ]);
+
+            // Check if already applied
+            $existingApplication = Application::where('job_id', $job->id)
+                ->where('candidate_id', Auth::id())
+                ->first();
+
+            if ($existingApplication) {
+                return back()->with('error', 'You have already applied for this job.');
+            }
+
+            // Process resume
+            $resumePath = null;
+            if ($request->hasFile('resume')) {
+                try {
+                    $resumePath = $request->file('resume')->store('resumes', 'public');
+
+                    // Update user's resume path
+                    $user = Auth::user();
+                    $user->resume_path = $resumePath;
+                    $user->save();
+                } catch (\Exception $e) {
+                    \Log::error('Error uploading resume: ' . $e->getMessage());
+                    return back()->with('error', 'There was an error uploading your resume. Please try again.');
+                }
+            } else {
+                $resumePath = Auth::user()->resume_path;
+            }
+
+            if (!$resumePath) {
+                return back()->with('error', 'Please upload a resume to apply for this job.');
+            }
+
+            // Create application with try-catch to handle database errors
+            try {
+                Application::create([
+                    'job_id' => $job->id,
+                    'candidate_id' => Auth::id(),
+                    'resume_path' => $resumePath,
+                    'message' => $request->message,
+                    'status' => 'pending'
+                ]);
+
+                return back()->with('success', 'Your application has been submitted successfully.');
+            } catch (\Exception $e) {
+                \Log::error('Error creating job application: ' . $e->getMessage());
+                return back()->with('error', 'There was an error submitting your application. Please try again later.');
+            }
+        } catch (\Exception $e) {
+            \Log::error('Error in job application process: ' . $e->getMessage());
+            return back()->with('error', 'An unexpected error occurred. Please try again later.');
         }
-
-        // Process resume
-        $resumePath = null;
-        if ($request->hasFile('resume')) {
-            $resumePath = $request->file('resume')->store('resumes', 'public');
-
-            // Update user's resume path
-            $user = Auth::user();
-            $user->resume_path = $resumePath;
-            $user->save();
-        } else {
-            $resumePath = Auth::user()->resume_path;
-        }
-
-        if (!$resumePath) {
-            return back()->with('error', 'Please upload a resume to apply for this job.');
-        }
-
-        // Create application
-        Application::create([
-            'job_id' => $job->id,
-            'candidate_id' => Auth::id(),
-            'resume_path' => $resumePath,
-            'message' => $request->message,
-            'status' => 'pending'
-        ]);
-
-        return back()->with('success', 'Your application has been submitted successfully.');
     }
 
     /**
@@ -199,4 +246,3 @@ class JobApplicationController extends Controller
         return back()->with('success', 'Your application has been canceled successfully.');
     }
 }
-?>

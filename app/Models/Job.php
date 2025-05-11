@@ -11,7 +11,7 @@ class Job extends Model
     protected $table = 'job_posts';
 
     protected $fillable = [
-        'title', 'description', 'location', 'type', 'salary_min', 'salary_max',
+        'title', 'description', 'location', 'type', 'experience_level', 'salary_min', 'salary_max',
         'deadline', 'category', 'employer_id', 'is_approved', 'company_logo'
     ];
 

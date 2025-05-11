@@ -20,13 +20,19 @@ class JobListingController extends Controller
         $query = Job::where('is_approved', true);
 
         // Apply search filters if provided
-        if ($request->has('search')) {
+        if ($request->has('search') && $request->input('search')) {
             $search = $request->input('search');
             $query->where(function($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
                   ->orWhere('description', 'like', "%{$search}%")
                   ->orWhere('location', 'like', "%{$search}%");
             });
+        }
+
+        // Filter by location
+        if ($request->has('location') && $request->input('location')) {
+            $location = $request->input('location');
+            $query->where('location', 'like', "%{$location}%");
         }
 
         // Filter by category
@@ -39,10 +45,41 @@ class JobListingController extends Controller
             $query->where('type', $request->input('type'));
         }
 
+        // Filter by experience level
+        if ($request->has('experience') && $request->input('experience')) {
+            $experience = $request->input('experience');
+            $query->where('experience_level', $experience);
+        }
+
+        // Filter by salary range
+        if ($request->has('salary_min') && $request->input('salary_min')) {
+            $salaryMin = $request->input('salary_min');
+            $query->where('salary_max', '>=', $salaryMin);
+        }
+
+        if ($request->has('salary_max') && $request->input('salary_max')) {
+            $salaryMax = $request->input('salary_max');
+            $query->where('salary_min', '<=', $salaryMax);
+        }
+
+        // Filter by posted date
+        if ($request->has('posted') && $request->input('posted')) {
+            $daysAgo = $request->input('posted');
+            $query->where('created_at', '>=', now()->subDays($daysAgo));
+        }
+
         // Sort results
         $sortBy = $request->input('sort', 'created_at');
         $sortOrder = $request->input('order', 'desc');
-        $query->orderBy($sortBy, $sortOrder);
+
+        // Special handling for salary sorting
+        if ($sortBy === 'salary_max') {
+            $query->orderByRaw('COALESCE(salary_max, 0) DESC');
+        } elseif ($sortBy === 'salary_min') {
+            $query->orderByRaw('COALESCE(salary_min, 0) ASC');
+        } else {
+            $query->orderBy($sortBy, $sortOrder);
+        }
 
         $jobs = $query->with('employer')->paginate(10);
 
@@ -77,6 +114,7 @@ class JobListingController extends Controller
             'location' => 'required|string|max:255',
             'category' => 'required|string|max:100',
             'type' => 'required|string|in:full-time,part-time,remote,contract,internship',
+            'experience_level' => 'nullable|string|in:entry,mid,senior,executive',
             'salary_min' => 'nullable|numeric|min:0',
             'salary_max' => 'nullable|numeric|min:0|gte:salary_min',
             'deadline' => 'required|date|after:today',
@@ -98,6 +136,7 @@ class JobListingController extends Controller
             'location' => $request->location,
             'category' => $request->category,
             'type' => $request->type,
+            'experience_level' => $request->experience_level,
             'salary_min' => $request->salary_min,
             'salary_max' => $request->salary_max,
             'deadline' => $request->deadline,
@@ -144,6 +183,7 @@ class JobListingController extends Controller
             'location' => 'required|string|max:255',
             'category' => 'required|string|max:100',
             'type' => 'required|string|in:full-time,part-time,remote,contract,internship',
+            'experience_level' => 'nullable|string|in:entry,mid,senior,executive',
             'salary_min' => 'nullable|numeric|min:0',
             'salary_max' => 'nullable|numeric|min:0|gte:salary_min',
             'deadline' => 'required|date|after:today',
@@ -178,6 +218,7 @@ class JobListingController extends Controller
             'location' => $request->location,
             'category' => $request->category,
             'type' => $request->type,
+            'experience_level' => $request->experience_level,
             'salary_min' => $request->salary_min,
             'salary_max' => $request->salary_max,
             'deadline' => $request->deadline,
@@ -236,4 +277,3 @@ class JobListingController extends Controller
             ->with('success', 'Your job listing has been deleted successfully.');
     }
 }
-?>

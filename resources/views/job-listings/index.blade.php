@@ -63,11 +63,46 @@
                                 </div>
 
                                 <div class="mb-3">
+                                    <label for="experience" class="form-label">Experience Level</label>
+                                    <select class="form-select" id="experience" name="experience">
+                                        <option value="">Any Experience</option>
+                                        <option value="entry" {{ request('experience') == 'entry' ? 'selected' : '' }}>Entry Level</option>
+                                        <option value="mid" {{ request('experience') == 'mid' ? 'selected' : '' }}>Mid Level</option>
+                                        <option value="senior" {{ request('experience') == 'senior' ? 'selected' : '' }}>Senior Level</option>
+                                        <option value="executive" {{ request('experience') == 'executive' ? 'selected' : '' }}>Executive</option>
+                                    </select>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="salary_range" class="form-label">Salary Range</label>
+                                    <div class="d-flex gap-2">
+                                        <input type="number" class="form-control" id="salary_min" name="salary_min"
+                                            value="{{ request('salary_min') }}" placeholder="Min" min="0">
+                                        <span class="align-self-center">-</span>
+                                        <input type="number" class="form-control" id="salary_max" name="salary_max"
+                                            value="{{ request('salary_max') }}" placeholder="Max" min="0">
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="posted" class="form-label">Posted Within</label>
+                                    <select class="form-select" id="posted" name="posted">
+                                        <option value="">Any Time</option>
+                                        <option value="1" {{ request('posted') == '1' ? 'selected' : '' }}>Last 24 hours</option>
+                                        <option value="7" {{ request('posted') == '7' ? 'selected' : '' }}>Last 7 days</option>
+                                        <option value="14" {{ request('posted') == '14' ? 'selected' : '' }}>Last 14 days</option>
+                                        <option value="30" {{ request('posted') == '30' ? 'selected' : '' }}>Last 30 days</option>
+                                    </select>
+                                </div>
+
+                                <div class="mb-3">
                                     <label for="sort" class="form-label">Sort By</label>
                                     <select class="form-select" id="sort" name="sort">
                                         <option value="created_at" {{ request('sort') == 'created_at' ? 'selected' : '' }}>Newest</option>
                                         <option value="deadline" {{ request('sort') == 'deadline' ? 'selected' : '' }}>Deadline</option>
                                         <option value="title" {{ request('sort') == 'title' ? 'selected' : '' }}>Title</option>
+                                        <option value="salary_max" {{ request('sort') == 'salary_max' ? 'selected' : '' }}>Salary (High to Low)</option>
+                                        <option value="salary_min" {{ request('sort') == 'salary_min' ? 'selected' : '' }}>Salary (Low to High)</option>
                                     </select>
                                 </div>
 

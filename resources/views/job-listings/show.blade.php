@@ -142,16 +142,52 @@
                                             <i class="fas fa-exclamation-circle me-2"></i> The application deadline has passed.
                                         </div>
                                     @else
-                                        <form action="{{ route('job-listings.apply', $job->id) }}" method="POST" id="job-application-form">
-                                            @csrf
-                                            <div class="mb-3">
-                                                <label for="message" class="form-label">Cover Letter (Optional)</label>
-                                                <textarea class="form-control" id="message" name="message" rows="5" placeholder="Tell the employer why you're a good fit for this position..." data-max-chars="1000"></textarea>
+                                        @if(!auth()->user()->resume_path)
+                                            <div class="alert alert-warning mb-3">
+                                                <i class="fas fa-exclamation-circle me-2"></i> You need to upload your resume before applying.
                                             </div>
-                                            <div class="d-grid">
-                                                <button type="submit" class="btn btn-primary">Apply Now</button>
-                                            </div>
-                                        </form>
+                                            <form action="{{ route('candidate.profile.update') }}" method="POST" enctype="multipart/form-data">
+                                                @csrf
+                                                @method('PATCH')
+                                                <div class="mb-3">
+                                                    <label for="resume" class="form-label">Upload Resume</label>
+                                                    <input type="file" class="form-control" id="resume" name="resume" required>
+                                                    <div class="form-text">Upload your resume in PDF format. Max size: 5MB.</div>
+                                                </div>
+                                                <div class="d-grid">
+                                                    <button type="submit" class="btn btn-primary">Upload Resume</button>
+                                                </div>
+                                                <div class="text-center mt-2">
+                                                    <a href="{{ route('candidate.profile') }}" class="small">Go to profile to upload more details</a>
+                                                </div>
+                                            </form>
+                                        @else
+                                            <form action="{{ route('job-listings.apply', $job->id) }}" method="POST" id="job-application-form">
+                                                @csrf
+                                                <div class="mb-3">
+                                                    <label for="message" class="form-label">Cover Letter (Optional)</label>
+                                                    <textarea class="form-control" id="message" name="message" rows="5" placeholder="Tell the employer why you're a good fit for this position..." data-max-chars="1000"></textarea>
+                                                </div>
+                                                <div class="d-grid">
+                                                    <button type="submit" class="btn btn-primary">Apply Now</button>
+                                                </div>
+                                                <div class="mt-3">
+                                                    <div class="d-flex align-items-center">
+                                                        <i class="fas fa-file-pdf text-danger me-2"></i>
+                                                        <span>Your resume is attached to this application</span>
+                                                    </div>
+                                                    <div class="mt-2">
+                                                        <a href="{{ asset('storage/' . auth()->user()->resume_path) }}" target="_blank" class="small">
+                                                            <i class="fas fa-eye me-1"></i> View your resume
+                                                        </a>
+                                                        <span class="mx-2">|</span>
+                                                        <a href="{{ route('candidate.profile') }}" class="small">
+                                                            <i class="fas fa-edit me-1"></i> Update resume
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        @endif
                                     @endif
                                 @endif
                             @elseif(auth()->user()->role === 'employer')

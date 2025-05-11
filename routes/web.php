@@ -10,6 +10,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\AboutController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\EmployersViewController;
+use App\Http\Controllers\StyledJobController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -104,12 +105,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
             ->name('profile');
         Route::patch('/profile', [CandidateController::class, 'updateProfile'])
             ->name('profile.update');
-        Route::post('/resume', [CandidateController::class, 'uploadResume'])
-            ->name('resume.upload');
 
         // Job Applications
         Route::prefix('job-applications')->name('job-applications.')->group(function () {
-            Route::get('/', [JobApplicationController::class, 'index'])
+            Route::get('/', [CandidateController::class, 'jobApplications'])
                 ->name('index');
             Route::delete('/{applicationId}', [JobApplicationController::class, 'cancel'])
                 ->name('cancel');
@@ -136,7 +135,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // Job Applications Management
         Route::get('/job/{jobId}/applications', [JobApplicationController::class, 'viewApplications'])
             ->name('job-applications.view');
+        Route::put('/application/{applicationId}/status', [JobApplicationController::class, 'updateStatus'])
+            ->name('application.update-status');
     });
+
+    // Styled Job Creation Page
+    Route::get('/job-listings/create-styled', [StyledJobController::class, 'create'])
+        ->name('job-listings.create-styled');
 
     // Job Listings Management (for employers)
     Route::resource('job-listings', JobListingController::class)

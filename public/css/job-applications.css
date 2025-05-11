@@ -1,0 +1,267 @@
+/* Job Applications Styles */
+
+.applications-container {
+    padding: 40px 0;
+}
+
+.applications-header {
+    margin-bottom: 30px;
+}
+
+.applications-header h1 {
+    font-size: 28px;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.applications-card {
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+    margin-bottom: 30px;
+    overflow: hidden;
+}
+
+.applications-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.applications-card .card-header {
+    padding: 15px 20px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.applications-card .card-header h5 {
+    font-weight: 600;
+    margin: 0;
+}
+
+.applications-card .card-body {
+    padding: 25px;
+}
+
+.job-details {
+    background-color: #f8f9fa;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 25px;
+}
+
+.job-details-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.job-details-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0;
+}
+
+.job-details-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+.job-detail-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.job-detail-label {
+    font-size: 14px;
+    color: #6c757d;
+    margin-bottom: 5px;
+}
+
+.job-detail-value {
+    font-weight: 500;
+}
+
+.application-table th {
+    font-weight: 600;
+    color: #495057;
+}
+
+.application-table td {
+    vertical-align: middle;
+}
+
+.application-status {
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.status-pending {
+    background-color: #f8f9fa;
+    color: #6c757d;
+}
+
+.status-reviewing {
+    background-color: #cfe2ff;
+    color: #0d6efd;
+}
+
+.status-interviewed {
+    background-color: #d1e7dd;
+    color: #0f5132;
+}
+
+.status-accepted {
+    background-color: #d1e7dd;
+    color: #0f5132;
+}
+
+.status-rejected {
+    background-color: #f8d7da;
+    color: #842029;
+}
+
+.candidate-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.candidate-name {
+    font-weight: 600;
+    margin-bottom: 3px;
+}
+
+.candidate-email {
+    font-size: 14px;
+    color: #6c757d;
+}
+
+.cover-letter {
+    background-color: #f8f9fa;
+    border-radius: 10px;
+    padding: 15px;
+    margin-top: 10px;
+    position: relative;
+}
+
+.cover-letter::before {
+    content: '';
+    position: absolute;
+    top: -8px;
+    left: 20px;
+    width: 0;
+    height: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-bottom: 8px solid #f8f9fa;
+}
+
+.cover-letter-header {
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: #495057;
+}
+
+.cover-letter-content {
+    font-size: 14px;
+    line-height: 1.5;
+    color: #6c757d;
+}
+
+.status-dropdown .dropdown-item {
+    display: flex;
+    align-items: center;
+}
+
+.status-dropdown .dropdown-item i {
+    width: 20px;
+    margin-right: 8px;
+}
+
+.status-dropdown .dropdown-item.status-reviewing {
+    color: #0d6efd;
+}
+
+.status-dropdown .dropdown-item.status-interviewed {
+    color: #198754;
+}
+
+.status-dropdown .dropdown-item.status-accepted {
+    color: #198754;
+}
+
+.status-dropdown .dropdown-item.status-rejected {
+    color: #dc3545;
+}
+
+.application-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.application-action-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background-color: #f8f9fa;
+    color: #495057;
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.application-action-btn:hover {
+    background-color: #e9ecef;
+    color: #0d6efd;
+}
+
+.application-action-btn.view-resume {
+    color: #0d6efd;
+}
+
+.application-action-btn.send-message {
+    color: #198754;
+}
+
+.application-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.application-filter {
+    padding: 8px 15px;
+    border-radius: 20px;
+    background-color: #f8f9fa;
+    color: #495057;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.application-filter:hover {
+    background-color: #e9ecef;
+}
+
+.application-filter.active {
+    background-color: #0d6efd;
+    color: white;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+    .applications-container {
+        padding: 20px 0;
+    }
+    
+    .job-details-grid {
+        grid-template-columns: 1fr;
+    }
+}

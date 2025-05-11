@@ -44,6 +44,18 @@
                         </div>
 
                         <div class="mb-4">
+                            <x-input-label for="experience_level" :value="__('Experience Level')" />
+                            <select id="experience_level" name="experience_level" class="block mt-1 w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
+                                <option value="">Select Experience Level</option>
+                                <option value="entry" {{ old('experience_level') == 'entry' ? 'selected' : '' }}>Entry Level</option>
+                                <option value="mid" {{ old('experience_level') == 'mid' ? 'selected' : '' }}>Mid Level</option>
+                                <option value="senior" {{ old('experience_level') == 'senior' ? 'selected' : '' }}>Senior Level</option>
+                                <option value="executive" {{ old('experience_level') == 'executive' ? 'selected' : '' }}>Executive</option>
+                            </select>
+                            <x-input-error :messages="$errors->get('experience_level')" class="mt-2" />
+                        </div>
+
+                        <div class="mb-4">
                             <x-input-label for="category" :value="__('Category')" />
                             <x-text-input id="category" class="block mt-1 w-full" type="text" name="category" :value="old('category')" required />
                             <x-input-error :messages="$errors->get('category')" class="mt-2" />
