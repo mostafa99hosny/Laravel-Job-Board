@@ -97,7 +97,17 @@ class JobListingController extends Controller
      */
     public function create()
     {
-        return view('job-listings.create');
+        // Get the employer
+        $employer = Auth::user();
+
+        // Get common categories for suggestions
+        $commonCategories = [
+            'Web Development', 'Mobile Development', 'UI/UX Design',
+            'Data Science', 'DevOps', 'Project Management',
+            'Marketing', 'Sales', 'Customer Support', 'Finance'
+        ];
+
+        return view('job-listings.create', compact('employer', 'commonCategories'));
     }
 
     /**
