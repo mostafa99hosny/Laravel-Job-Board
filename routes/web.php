@@ -10,7 +10,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\AboutController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\EmployersViewController;
-use App\Http\Controllers\StyledJobController;
+
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -61,7 +61,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Dashboard
     Route::get('/dashboard', function () {
         return view('dashboard');
-    })->name('dashboard');
+    })->name('dashboard')->middleware('redirect.role');
 
     // User Profile (All authenticated users)
     Route::prefix('profile')->name('profile.')->group(function () {
@@ -138,10 +138,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::put('/application/{applicationId}/status', [JobApplicationController::class, 'updateStatus'])
             ->name('application.update-status');
     });
-
-    // Styled Job Creation Page
-    Route::get('/job-listings/create-styled', [StyledJobController::class, 'create'])
-        ->name('job-listings.create-styled');
 
     // Job Listings Management (for employers)
     Route::resource('job-listings', JobListingController::class)
