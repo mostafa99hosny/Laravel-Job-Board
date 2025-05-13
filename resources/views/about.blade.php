@@ -93,8 +93,24 @@
                             <div class="rounded-circle overflow-hidden mx-auto mb-4" style="width: 150px; height: 150px;">
                                 <img src="{{ asset('images/team-1.jpg') }}" alt="Team Member" class="img-fluid">
                             </div>
-                            <h3 class="h5 mb-1">Omar Mahmoud</h3>
+                            <h3 class="h5 mb-1">Hamdy Salah</h3>
                             <p class="text-muted mb-3">CEO & Founder</p>
+                            <div class="social-icons">
+                                <a href="#" class="text-primary me-2"><i class="fab fa-linkedin-in"></i></a>
+                                <a href="#" class="text-primary me-2"><i class="fab fa-twitter"></i></a>
+                                <a href="#" class="text-primary"><i class="fas fa-envelope"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body text-center p-4">
+                            <div class="rounded-circle overflow-hidden mx-auto mb-4" style="width: 150px; height: 150px;">
+                                <img src="{{ asset('images/team-1.jpg') }}" alt="Team Member" class="img-fluid">
+                            </div>
+                            <h3 class="h5 mb-1">Omar Mahmoud</h3>
+                            <p class="text-muted mb-3">Co-Founder</p>
                             <div class="social-icons">
                                 <a href="#" class="text-primary me-2"><i class="fab fa-linkedin-in"></i></a>
                                 <a href="#" class="text-primary me-2"><i class="fab fa-twitter"></i></a>
